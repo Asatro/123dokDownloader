@@ -103,23 +103,12 @@ exports.handler = async (event, context) => {
 
 function extractDocumentId(url) {
   try {
-    // Common 123dok URL patterns:
-    // https://123dok.com/document/1234567/title
-    // https://123dok.com/document/1234567
-    
-    const patterns = [
-      /123dok\.com\/document\/([^\/\?]+)/,
-      /123dok\.com\/doc\/([^\/\?]+)/,
-      /123dok\.com\/[^\/]*\/([0-9]+)/
-    ];
-    
-    for (const pattern of patterns) {
-      const match = url.match(pattern);
-      if (match && match[1]) {
-        return match[1];
-      }
+    // Pola baru: ambil apapun setelah /document/ sampai / atau .html atau akhir
+    const pattern = /123dok\.com\/document\/([a-zA-Z0-9\-]+)/;
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
     }
-    
     return null;
   } catch (error) {
     console.error('Error extracting document ID:', error);
@@ -136,6 +125,8 @@ async function getDocumentInfo(documentId) {
       }
     });
     const html = await response.text();
+
+    console.log('HTML fetched:', html.substring(0, 500)); // log 500 karakter pertama
 
     // Cari window.previewing di HTML
     const match = html.match(/window\.previewing\s*=\s*'(.*?)';/);
@@ -154,16 +145,3 @@ async function getDocumentInfo(documentId) {
     return null;
   }
 }
-
-// Contoh AJAX ke Netlify Function
-fetch('/.netlify/functions/download', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ url: 'https://123dok.com/document/1234567' })
-})
-.then(res => res.json())
-.then(data => {
-  if (data.success) {
-    // data.downloadUrl, data.filename, dst
-  }
-});
