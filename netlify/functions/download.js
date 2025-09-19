@@ -1,6 +1,7 @@
 const https = require('https');
 const http = require('http');
 const { URL } = require('url');
+const fetch = require('node-fetch');
 
 exports.handler = async (event, context) => {
   // Handle CORS preflight
@@ -127,97 +128,42 @@ function extractDocumentId(url) {
 }
 
 async function getDocumentInfo(documentId) {
-  return new Promise((resolve, reject) => {
-    // This is a simplified example - you'll need to implement
-    // the actual 123dok API interaction based on their system
-    
-    const options = {
-      hostname: '123dok.com',
-      port: 443,
-      path: `/api/document/${documentId}`, // hypothetical API endpoint
-      method: 'GET',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
-      }
-    };
-
-    const req = https.request(options, (res) => {
-      let data = '';
-
-      res.on('data', (chunk) => {
-        data += chunk;
-      });
-
-      res.on('end', () => {
-        try {
-          if (res.statusCode === 200) {
-            // Parse response and extract download info
-            // This is where you'd implement the actual logic
-            // to parse 123dok's response and get download links
-            
-            resolve({
-              downloadUrl: `https://123dok.com/download/${documentId}`, // example
-              filename: `document_${documentId}.pdf`,
-              title: 'Document Title'
-            });
-          } else {
-            resolve(null);
-          }
-        } catch (error) {
-          reject(error);
-        }
-      });
-    });
-
-    req.on('error', (error) => {
-      reject(error);
-    });
-
-    // Set timeout
-    req.setTimeout(10000, () => {
-      req.destroy();
-      reject(new Error('Request timeout'));
-    });
-
-    req.end();
-  });
-}
-
-// Alternative approach using fetch (if you have node-fetch dependency)
-/*
-const fetch = require('node-fetch');
-
-async function getDocumentInfo(documentId) {
   try {
-    const response = await fetch(`https://123dok.com/document/${documentId}`, {
+    const pageUrl = `https://123dok.com/document/${documentId}`;
+    const response = await fetch(pageUrl, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+        'User-Agent': 'Mozilla/5.0'
       }
     });
-    
-    if (!response.ok) {
-      return null;
-    }
-    
     const html = await response.text();
-    
-    // Parse HTML to extract download links
-    // You'd need to analyze the actual 123dok page structure
-    const downloadUrlMatch = html.match(/download[^"]*\.pdf/);
-    const titleMatch = html.match(/<title>([^<]+)<\/title>/);
-    
-    if (downloadUrlMatch) {
+
+    // Cari window.previewing di HTML
+    const match = html.match(/window\.previewing\s*=\s*'(.*?)';/);
+    if (match && match[1]) {
+      const previewingUrl = match[1];
+      const filename = previewingUrl.split('/').pop();
       return {
-        downloadUrl: downloadUrlMatch[0],
-        filename: `document_${documentId}.pdf`,
-        title: titleMatch ? titleMatch[1] : 'Document'
+        downloadUrl: previewingUrl,
+        filename: filename,
+        title: 'Document'
       };
     }
-    
     return null;
   } catch (error) {
     console.error('Error fetching document info:', error);
     return null;
   }
 }
-*/
+
+// Contoh AJAX ke Netlify Function
+fetch('/.netlify/functions/download', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({ url: 'https://123dok.com/document/1234567' })
+})
+.then(res => res.json())
+.then(data => {
+  if (data.success) {
+    // data.downloadUrl, data.filename, dst
+  }
+});

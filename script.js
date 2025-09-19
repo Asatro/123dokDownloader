@@ -9,81 +9,44 @@ document.addEventListener('DOMContentLoaded', function() {
 
     form.addEventListener('submit', async function(e) {
         e.preventDefault();
-        
-        const docUrl = document.getElementById('docUrl').value.trim();
-        
-        if (!docUrl) {
-            showError('Please enter a valid 123dok.com URL');
-            return;
-        }
+        const url = document.getElementById('docUrl').value;
+        btn.querySelector('.btn-text').style.display = 'none';
+        btn.querySelector('.loading').style.display = 'inline';
 
-        if (!docUrl.includes('123dok.com')) {
-            showError('Please enter a valid 123dok.com URL');
-            return;
-        }
+        // Reset result
+        result.style.display = 'none';
+        downloadLink.style.display = 'none';
+        resultMessage.textContent = '';
 
-        // Start loading state
-        setLoadingState(true);
-        
         try {
-            // Call Netlify Function
-            const response = await fetch('/.netlify/functions/download', {
+            const res = await fetch('/.netlify/functions/download', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ url: docUrl })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url })
             });
+            const data = await res.json();
 
-            const data = await response.json();
+            btn.querySelector('.btn-text').style.display = 'inline';
+            btn.querySelector('.loading').style.display = 'none';
 
-            if (!response.ok) {
-                throw new Error(data.error || 'Download failed');
-            }
+            result.style.display = 'block';
 
             if (data.success) {
-                showSuccess('Document processed successfully!', data.downloadUrl, data.filename);
+                resultMessage.textContent = data.message;
+                const link = downloadLink;
+                link.href = data.downloadUrl;
+                link.download = data.filename;
+                link.style.display = 'inline-block';
             } else {
-                showError(data.error || 'Failed to process document');
+                resultMessage.textContent = data.error || 'Failed to get download link.';
             }
-
-        } catch (error) {
-            console.error('Error:', error);
-            showError('Failed to process document: ' + error.message);
-        } finally {
-            setLoadingState(false);
+        } catch (err) {
+            btn.querySelector('.btn-text').style.display = 'inline';
+            btn.querySelector('.loading').style.display = 'none';
+            result.style.display = 'block';
+            resultMessage.textContent = 'Error connecting to server.';
         }
     });
-
-    function setLoadingState(loading_state) {
-        if (loading_state) {
-            btn.disabled = true;
-            btnText.style.display = 'none';
-            loading.style.display = 'inline';
-        } else {
-            btn.disabled = false;
-            btnText.style.display = 'inline';
-            loading.style.display = 'none';
-        }
-    }
-
-    function showError(message) {
-        result.style.display = 'block';
-        resultMessage.innerHTML = `<div class="error">${message}</div>`;
-        downloadLink.style.display = 'none';
-    }
-
-    function showSuccess(message, downloadUrl, filename) {
-        result.style.display = 'block';
-        resultMessage.innerHTML = `<div class="success">${message}</div>`;
-        
-        if (downloadUrl) {
-            downloadLink.href = downloadUrl;
-            downloadLink.download = filename || 'document.pdf';
-            downloadLink.style.display = 'inline-block';
-            downloadLink.textContent = `Download ${filename || 'Document'}`;
-        }
-    }
 
     // URL validation helper
     function isValidUrl(string) {
