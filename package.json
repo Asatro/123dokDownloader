@@ -1,0 +1,24 @@
+{
+  "name": "123dok-downloader-netlify",
+  "version": "1.0.0",
+  "description": "123dok.com document downloader hosted on Netlify",
+  "main": "index.html",
+  "scripts": {
+    "dev": "netlify dev",
+    "build": "echo 'No build process needed for static site'",
+    "deploy": "netlify deploy --prod"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  },
+  "keywords": [
+    "123dok",
+    "downloader",
+    "netlify",
+    "document",
+    "pdf"
+  ],
+  "author": "Your Name",
+  "license": "MIT"
+}

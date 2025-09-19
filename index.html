@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>123dok Downloader</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>123dok Document Downloader</h1>
+            <p>Download documents from 123dok.com for free</p>
+        </header>
+        
+        <div class="download-form">
+            <form id="downloadForm">
+                <div class="input-group">
+                    <label for="docUrl">123dok.com Document URL:</label>
+                    <input type="url" id="docUrl" name="docUrl" required 
+                           placeholder="https://123dok.com/document/xxxxx">
+                </div>
+                
+                <button type="submit" id="downloadBtn">
+                    <span class="btn-text">Download Document</span>
+                    <span class="loading" style="display: none;">Processing...</span>
+                </button>
+            </form>
+            
+            <div id="result" class="result-container" style="display: none;">
+                <div class="result-content">
+                    <h3>Download Result</h3>
+                    <div id="resultMessage"></div>
+                    <a id="downloadLink" href="#" download style="display: none;" class="download-link">
+                        Download File
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>How to use:</h3>
+            <ol>
+                <li>Copy the full URL of the document from 123dok.com</li>
+                <li>Paste it in the input field above</li>
+                <li>Click "Download Document" button</li>
+                <li>Wait for processing and download the file</li>
+            </ol>
+        </div>
+        
+        <footer>
+            <p>⚠️ This tool is for educational purposes only. Please respect copyright laws.</p>
+        </footer>
+    </div>
+    
+    <script src="script.js"></script>
+</body>
+</html>
