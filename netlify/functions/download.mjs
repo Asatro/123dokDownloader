@@ -1,9 +1,6 @@
-const https = require('https');
-const http = require('http');
-const { URL } = require('url');
-const fetch = require('node-fetch');
+import fetch from 'node-fetch';
 
-exports.handler = async (event, context) => {
+export async function handler(event, context) {
   // Handle CORS preflight
   if (event.httpMethod === 'OPTIONS') {
     return {
