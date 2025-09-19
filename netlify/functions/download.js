@@ -30,7 +30,7 @@ exports.handler = async (event, context) => {
 
   try {
     const { url } = JSON.parse(event.body);
-    
+
     if (!url || !url.includes('123dok.com')) {
       return {
         statusCode: 400,
@@ -42,7 +42,7 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Extract document ID from URL
+    // Extract document ID from URL (support format with .html or without)
     const documentId = extractDocumentId(url);
     if (!documentId) {
       return {
@@ -57,7 +57,7 @@ exports.handler = async (event, context) => {
 
     // Try to get document info and download URL
     const documentInfo = await getDocumentInfo(documentId);
-    
+
     if (!documentInfo) {
       return {
         statusCode: 404,
@@ -87,7 +87,7 @@ exports.handler = async (event, context) => {
 
   } catch (error) {
     console.error('Error processing request:', error);
-    
+
     return {
       statusCode: 500,
       headers: {
@@ -101,10 +101,11 @@ exports.handler = async (event, context) => {
   }
 };
 
+// Mendukung format: /document/{id}-{judul}.html atau /document/{id}
 function extractDocumentId(url) {
   try {
-    // Pola baru: ambil apapun setelah /document/ sampai / atau .html atau akhir
-    const pattern = /123dok\.com\/document\/([a-zA-Z0-9\-]+)/;
+    // Ambil ID setelah /document/ dan sebelum - atau .html atau /
+    const pattern = /123dok\.com\/document\/([a-zA-Z0-9]+)/;
     const match = url.match(pattern);
     if (match && match[1]) {
       return match[1];
@@ -125,8 +126,6 @@ async function getDocumentInfo(documentId) {
       }
     });
     const html = await response.text();
-
-    console.log('HTML fetched:', html.substring(0, 500)); // log 500 karakter pertama
 
     // Cari window.previewing di HTML
     const match = html.match(/window\.previewing\s*=\s*'(.*?)';/);
